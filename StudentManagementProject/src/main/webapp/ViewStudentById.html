@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Student by ID</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-image: url('https://img.freepik.com/premium-photo/high-angle-view-multi-colored-pencils-paper_1048944-2836084.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .navbar, .footer {
+            background-color: #4CAF50;
+            animation: slideDown 1.5s ease-in-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 40px;
+        }
+
+        .footer-text {
+            color: white;
+        }
+
+        .navbar-nav .nav-link, .footer-nav .nav-link {
+            color: white;
+        }
+
+        .navbar-nav .nav-link:hover, .footer-nav .nav-link:hover {
+            color: #ff9800;
+        }
+
+        .navbar {
+            padding: 20px 0;
+        }
+
+        .form-container {
+            max-width: 1300px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.6); /* Darker background overlay for better readability */ 
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-custom {
+            padding: 12px 20px;
+            font-size: 16px;
+        }
+
+        .footer {
+            margin-top: 62px;
+            padding: 15px 0;
+            text-align: center;
+            animation: slideUp 1.5s ease-in-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar Section -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Student Management</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ViewStudentById.html">Get By ID</a></li>
+                    <li class="nav-item"><a class="nav-link" href="view_all_students.html">View All Students</a></li>
+                    <li class="nav-item"><a class="nav-link" href="welcome.html">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Student Form -->
+    <div class="form-container">
+        <h2 style="color: #fff; font-family: 'Arial', sans-serif; font-weight: bold; font-size: 2.5rem; text-align: center; text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6);">
+            <i class="fas fa-search"></i> Search Student by ID
+        </h2>
+        <form id="searchForm">
+            <div class="mb-3">
+                <label for="searchStudentId" class="form-label" style="font-size: 1.1rem; color: #fff;">Enter Student ID</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                    <input type="text" class="form-control" id="searchStudentId" name="id" placeholder="Enter student ID" required>
+                </div>
+            </div>
+            <br>
+            <button type="submit" class="btn w-100" style="background-color: #007bff; border-color: #007bff;">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </form>
+
+        <div id="searchResponse" class="mt-4">
+            <!-- Student Details Table will appear here -->
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="footer-nav">
+            <ul class="nav justify-content-center">
+                <li class="nav-item"><a class="nav-link" href="#">Privacy Policy</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Terms and Conditions</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Help</a></li>
+            </ul>
+        </div>
+        <p class="footer-text">© 2025 Student Management System. All rights reserved.</p>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+    $(document).ready(function () {
+        $('#searchForm').on('submit', function (event) {
+            event.preventDefault();
+
+            const studentId = $('#searchStudentId').val().trim();
+
+            if (!studentId) {
+                $('#searchResponse').html('<p style="color: red;">Please enter a student ID.</p>');
+                return;
+            }
+            $.ajax({
+                url: '/StudentManagementProject/GetStudentById', 
+                type: 'GET',
+                data: { id: studentId },
+                success: function (data) {
+                    if (data.startsWith('error|')) {
+                        const errorMessage = data.split('|')[1];
+                        $('#searchResponse').html(`<p style="color: red;">${errorMessage}</p>`);
+                    } else {
+                      
+                        const [
+                            studentId,
+                            studentName,
+                            studentAge,
+                            studentGender,
+                            studentDob,
+                            studentPhone,
+                            studentJoiningDate,
+                            studentFee,
+                            studentBranch,
+                            studentCountry,
+                            studentState,
+                            studentAddress,
+                        ] = data.split('|');
+
+                        const table = `
+                            <div class="table-responsive">
+                                <table class="table table-hover table-bordered text-center align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Age</th>
+                                            <th>Gender</th>
+                                            <th>Date of Birth</th>
+                                            <th>Phone</th>
+                                            <th>Date of Joining</th>
+                                            <th>Fee</th>
+                                            <th>Branch</th>
+                                            <th>Country</th>
+                                            <th>State</th>
+                                            <th>Address</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>${studentId}</td>
+                                            <td>${studentName}</td>
+                                            <td>${studentAge}</td>
+                                            <td>${studentGender}</td>
+                                            <td>${studentDob}</td>
+                                            <td>${studentPhone}</td>
+                                            <td>${studentJoiningDate}</td>
+                                            <td>${studentFee}</td>
+                                            <td>${studentBranch}</td>
+                                            <td>${studentCountry}</td>
+                                            <td>${studentState}</td>
+                                            <td>${studentAddress}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>`;
+                        $('#searchResponse').html(table);
+                    }
+                },
+                error: function () {
+                    $('#searchResponse').html('<p style="color: red;">An error occurred. Please try again later.</p>');
+                },
+            });
+        });
+    });
+</script>
+
+    <!-- Bootstrap and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
